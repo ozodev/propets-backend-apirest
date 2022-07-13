@@ -1,7 +1,16 @@
 package com.propets.apirest.main.models.entity;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 public class Autenticacion {
-    private String email,password;
+    @Email
+    @NotEmpty
+    private String email;
+    @NotEmpty
+    @Size(min = 8,max = 16)
+    private String password;
     private Boolean status;
 
     public String getEmail() {return email;}

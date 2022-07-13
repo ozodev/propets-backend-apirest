@@ -3,6 +3,10 @@ package com.propets.apirest.main.models.entity;
 import java.io.Serializable;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="personas")
@@ -16,10 +20,20 @@ public class Persona implements Serializable {
 	@JoinColumn(name="usuario_email",referencedColumnName = "usuario_email",foreignKey = @ForeignKey(name = "fk_persona_usuario_email"))
 	private Usuario usuario;
 	@Column(name="persona_nombre",length=30)
+	@NotEmpty
+	@NotNull
+	@Size(max = 30)
 	private String nombre;
 	@Column(name="persona_apellido",length=30)
+	@NotEmpty
+	@NotNull
+	@Size(max = 30)
 	private String apellido;
 	@Column(name="persona_telefono",length=10)
+	@NotEmpty
+	@NotNull
+	@Positive
+	@Size(max = 10)
 	private String telefono;
 
 	public String getNombre() {
