@@ -1,8 +1,8 @@
-package com.propets.apirest.main.models.entity;
+package com.propets.apirest.main.models.objects;
 
 import javax.validation.constraints.*;
 
-public class UsuarioData {
+public class UsuarioData extends UsuarioAuth {
     @NotEmpty
     @NotNull
     @Size(max = 30)
@@ -12,17 +12,11 @@ public class UsuarioData {
     @Size(max = 30)
     private String apellido;
 
-    @Email
-    @NotEmpty
-    private String email;
     @NotEmpty
     @NotNull
     @Positive
     @Size(max = 10)
     private String telefono;
-    @NotEmpty
-    @Size(min = 8,max = 16)
-    private String password;
 
     public String getNombre() {return nombre;}
 
@@ -32,15 +26,7 @@ public class UsuarioData {
 
     public void setApellido(String apellido) {this.apellido = apellido;}
 
-    public String getEmail() {return email;}
-
-    public void setEmail(String email) {this.email = email;}
-
     public String getTelefono() {return telefono;}
 
     public void setTelefono(String telefono) {this.telefono = telefono;}
-
-    public String getPassword() {return password;}
-
-    public void setPassword(String password) {this.password = password;}
 }

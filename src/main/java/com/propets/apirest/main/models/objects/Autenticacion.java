@@ -1,4 +1,4 @@
-package com.propets.apirest.main.models.entity;
+package com.propets.apirest.main.models.objects;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

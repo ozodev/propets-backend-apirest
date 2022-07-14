@@ -1,5 +1,7 @@
 package com.propets.apirest.main.models.entity;
 
+import com.propets.apirest.main.models.objects.UsuarioData;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -20,7 +22,13 @@ public class Usuario implements Serializable {
     private String password;
     @OneToOne(mappedBy = "usuario",cascade = CascadeType.ALL)
     private Persona persona;
-
+    public Usuario(){}
+    public Usuario(UsuarioData data){
+        this.email=data.getEmail();
+        this.password = data.getPassword();
+        this.persona = new Persona(data,this);
+    }
+    public void setPersona(Persona persona) {this.persona = persona;}
     public Persona getPersona() {return persona;}
 
     public String getEmail() {return email;}
