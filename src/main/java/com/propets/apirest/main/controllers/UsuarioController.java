@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
+import static com.propets.apirest.main.services.MessageService.errorMessage;
+import static com.propets.apirest.main.services.MessageService.sendMessageError;
 
 @RestController
 @RequestMapping("/api")
@@ -36,21 +37,13 @@ public class UsuarioController {
     @RequestMapping(value = "/usuario",method = RequestMethod.POST,consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> createUser(@Valid @ModelAttribute UsuarioData data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(!Objects.isNull(usuarioService.findByEmail(data.getEmail()))){
-            Map<String, String> error = new HashMap<>();
-            error.put("error","El Usuario "+data.getEmail()+" ya Existe");
-            return new ResponseEntity<>(error,HttpStatus.UNAUTHORIZED);
-        }
+        if(!Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" ya Existe",HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(usuarioService.save(new Usuario(data)),HttpStatus.CREATED);
     }
     @RequestMapping(value ="/usuario",method = RequestMethod.PUT, consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> updateUser(@Valid @ModelAttribute UsuarioData data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(Objects.isNull(usuarioService.findByEmail(data.getEmail()))){
-            Map<String, String> error = new HashMap<>();
-            error.put("error","El Usuario "+data.getEmail()+" no Existe");
-            return new ResponseEntity<>(error,HttpStatus.UNAUTHORIZED);
-        }
+        if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
         Usuario user = usuarioService.findByEmail(data.getEmail());
         if(!user.isAuth(data.getPassword())) return MessageService.loginError();
         user.getPersona().update(data);
@@ -59,24 +52,12 @@ public class UsuarioController {
     @RequestMapping(value = "/usuario",method = RequestMethod.DELETE,consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> deleteUser(@Valid @ModelAttribute UsuarioAuth data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(Objects.isNull(usuarioService.findByEmail(data.getEmail()))){
-            Map<String, String> error = new HashMap<>();
-            error.put("error","El Usuario "+data.getEmail()+" no Existe");
-            return new ResponseEntity<>(error,HttpStatus.UNAUTHORIZED);
-        }
+        if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
         Usuario user = usuarioService.findByEmail(data.getEmail());
         if(!user.isAuth(data.getPassword())) return MessageService.loginError();
         usuarioService.delete(user);
         Map<String, String> result = new HashMap<>();
         result.put("message","Usuario "+data.getEmail()+" fue Eliminado");
         return new ResponseEntity<>(result,HttpStatus.ACCEPTED);
-    }
-
-
-    private ResponseEntity<Map<String, Object>> errorMessage(BindingResult validationResult){
-        Map<String, Object> error = new HashMap<>();
-        List<String> errorList = validationResult.getFieldErrors().stream().map(err -> "El Campo '"+ err.getField() + "' "+err.getDefaultMessage()).collect(Collectors.toList());
-        error.put("errores",errorList);
-        return new ResponseEntity<Map<String, Object>>(error,HttpStatus.BAD_REQUEST);
     }
 }
