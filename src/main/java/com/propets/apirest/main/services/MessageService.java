@@ -18,6 +18,11 @@ public class MessageService {
         error.put("error",message);
         return new ResponseEntity<Map<String, Object>>(error, httpStatus);
     }
+    public static ResponseEntity<Map<String, Object>> sendMessage(String message, HttpStatus httpStatus){
+        Map<String, Object> error = new HashMap<>();
+        error.put("message",message);
+        return new ResponseEntity<Map<String, Object>>(error, httpStatus);
+    }
     public static ResponseEntity<Map<String, Object>> errorMessage(BindingResult validationResult){
         Map<String, Object> error = new HashMap<>();
         List<String> errorList = validationResult.getFieldErrors().stream().map(err -> "El Campo '"+ err.getField() + "' "+err.getDefaultMessage()).collect(Collectors.toList());

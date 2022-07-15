@@ -30,7 +30,13 @@ public class MascotaController {
     @Autowired
     private MascotaService mascotaService;
 
-    @RequestMapping(value = "/mascota",method = RequestMethod.POST,consumes = {"multipart/form-data"})
+    @GetMapping(value = "/mascota/{id}")
+    public @ResponseBody ResponseEntity<?> show(@PathVariable String id){
+        Mascota mascota = mascotaService.findById(id);
+        if(Objects.isNull(mascota)) return sendMessageError("La Mascota "+id+" no Existe",HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(mascota,HttpStatus.OK);
+    }
+    @PostMapping(value = "/mascota",consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> createMascota(@Valid @ModelAttribute MascotaData data, BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
         if(Objects.isNull(usuarioService.findByEmail(data.getEmail()))) return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
@@ -41,7 +47,7 @@ public class MascotaController {
         return new ResponseEntity<>(mascota,HttpStatus.CREATED);
     }
 
-    @RequestMapping(value ="/mascota",method = RequestMethod.PUT, consumes = {"multipart/form-data"})
+    @PutMapping(value ="/mascota", consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> updateMascota(@Valid @ModelAttribute MascotaData data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
         if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
@@ -53,7 +59,7 @@ public class MascotaController {
         return new ResponseEntity<>(mascotaService.save(mascota), HttpStatus.ACCEPTED);
     }
 
-    @RequestMapping(value = "/mascota",method = RequestMethod.DELETE,consumes = {"multipart/form-data"})
+    @DeleteMapping(value = "/mascota",consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> deleteMascota(@Valid @ModelAttribute MascotaDelete data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
         if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
