@@ -1,7 +1,6 @@
 package com.propets.apirest.main.models.entity;
 
-import com.propets.apirest.main.models.Enums.Role_Type;
-import com.propets.apirest.main.models.objects.MascotaData;
+import com.propets.apirest.main.models.Enums.RoleType;
 import com.propets.apirest.main.models.objects.UsuarioData;
 
 import javax.persistence.*;
@@ -12,7 +11,6 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -36,7 +34,7 @@ public class Usuario implements Serializable {
     public Usuario(){}
     public Usuario(UsuarioData data){
         this.email=data.getEmail();
-        this.rol = Role_Type.USUARIO.getRol();
+        this.rol = RoleType.USUARIO.getRol();
         this.password = data.getPassword();
         this.persona = new Persona(data,this);
     }
@@ -51,11 +49,11 @@ public class Usuario implements Serializable {
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
     public void setPassword(String password) {this.password = password;}
-    public Role_Type getRol() {return Role_Type.valueOf(this.rol);}
-    public void setRol(Role_Type rol) {this.rol = rol.getRol();}
+    public RoleType getRol() {return RoleType.valueOf(this.rol);}
+    public void setRol(RoleType rol) {this.rol = rol.getRol();}
 
-    public Boolean isAdmin(){return Role_Type.valueOf(this.rol).equals(Role_Type.ADMIN);}
-    public Boolean isVeterinario(){return Role_Type.valueOf(this.rol).equals(Role_Type.VETERINARIO);}
+    public Boolean isAdmin(){return RoleType.valueOf(this.rol).equals(RoleType.ADMIN);}
+    public Boolean isVeterinario(){return RoleType.valueOf(this.rol).equals(RoleType.VETERINARIO);}
 
     private static final long serialVersionUID = 1L;
 }

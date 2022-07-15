@@ -1,5 +1,8 @@
 package com.propets.apirest.main.controllers;
 
+import com.propets.apirest.main.models.Enums.ColorType;
+import com.propets.apirest.main.models.Enums.RazaType;
+import com.propets.apirest.main.models.Enums.SizeType;
 import com.propets.apirest.main.models.entity.Mascota;
 import com.propets.apirest.main.models.entity.Usuario;
 import com.propets.apirest.main.models.objects.MascotaData;
@@ -36,6 +39,12 @@ public class MascotaController {
         if(Objects.isNull(mascota)) return sendMessageError("La Mascota "+id+" no Existe",HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(mascota,HttpStatus.OK);
     }
+    @GetMapping(value = "/mascota/raza")
+    public @ResponseBody ResponseEntity<?> showRazas(){return new ResponseEntity<>(RazaType.values(),HttpStatus.OK);}
+    @GetMapping(value = "/mascota/color")
+    public @ResponseBody ResponseEntity<?> showColores(){return new ResponseEntity<>(ColorType.values(),HttpStatus.OK);}
+    @GetMapping(value = "/mascota/size")
+    public @ResponseBody ResponseEntity<?> showSize(){return new ResponseEntity<>(SizeType.values(),HttpStatus.OK);}
     @PostMapping(value = "/mascota",consumes = {"multipart/form-data"})
     public @ResponseBody ResponseEntity<?> createMascota(@Valid @ModelAttribute MascotaData data, BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
@@ -47,14 +56,14 @@ public class MascotaController {
         return new ResponseEntity<>(mascota,HttpStatus.CREATED);
     }
 
-    @PutMapping(value ="/mascota", consumes = {"multipart/form-data"})
-    public @ResponseBody ResponseEntity<?> updateMascota(@Valid @ModelAttribute MascotaData data,BindingResult validationResult){
+    @PutMapping(value ="/mascota/{id}", consumes = {"multipart/form-data"})
+    public @ResponseBody ResponseEntity<?> updateMascota(@PathVariable String id,@Valid @ModelAttribute MascotaData data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
         if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
         Usuario user = usuarioService.findByEmail(data.getEmail());
         if(!user.isAuth(data.getPassword())) return MessageService.loginError();
-        if(Objects.isNull(mascotaService.findById(data.getId()))) return sendMessageError("La Mascota de "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
-        Mascota mascota = mascotaService.findById(data.getId());
+        if(Objects.isNull(mascotaService.findById(id))) return sendMessageError("La Mascota de "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
+        Mascota mascota = mascotaService.findById(id);
         mascota.update(data);
         return new ResponseEntity<>(mascotaService.save(mascota), HttpStatus.ACCEPTED);
     }

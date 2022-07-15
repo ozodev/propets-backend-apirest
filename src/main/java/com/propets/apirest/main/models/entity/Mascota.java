@@ -1,6 +1,9 @@
 package com.propets.apirest.main.models.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.propets.apirest.main.models.Enums.ColorType;
+import com.propets.apirest.main.models.Enums.RazaType;
+import com.propets.apirest.main.models.Enums.SizeType;
 import com.propets.apirest.main.models.objects.MascotaData;
 
 import javax.persistence.*;
@@ -21,16 +24,16 @@ public class Mascota implements Serializable {
     @NotNull @NotEmpty
     private String nombre;
     @Column(name = "mascota_raza",length = 3,nullable = false)
-    @NotNull @Positive
+    @NotNull
     private int raza;
     @Column( name = "mascota_tamaño",length = 100,nullable = false)
-    @NotNull @Positive
+    @NotNull
     private double size;
     @Column(name = "mascota_peso",length = 2,nullable = false)
     @NotNull @Positive
     private double peso;
     @Column(name = "mascota_color",length = 10,nullable = false)
-    @NotNull @Positive
+    @NotNull
     private int color;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
@@ -47,10 +50,10 @@ public class Mascota implements Serializable {
     }
     public void update(MascotaData data){
         this.nombre= data.getNombre();
-        this.raza= data.getRaza();
+        this.raza= RazaType.valueOf(data.getRaza().toUpperCase()).getRaza();
         this.peso = data.getPeso();
-        this.color = data.getColor();
-        this.size = data.getSize();
+        this.color = ColorType.valueOf(data.getColor().toUpperCase()).getColor();
+        this.size = SizeType.valueOf(data.getSize().toUpperCase()).getSize();
     }
 
     public Usuario getUsuario(){return this.usuario;}
@@ -59,14 +62,14 @@ public class Mascota implements Serializable {
     public void setId(String id) {this.id = id;}
     public String getNombre() {return nombre;}
     public void setNombre(String nombre) {this.nombre = nombre;}
-    public int getRaza() {return raza;}
-    public void setRaza(int raza) {this.raza = raza;}
-    public double getSize() {return size;}
-    public void setSize(double size) {this.size = size;}
+    public RazaType getRaza() {return RazaType.valueOf(this.raza);}
+    public void setRaza(RazaType type) {this.raza = type.getRaza();}
+    public SizeType getSize() {return SizeType.valueOf(this.size);}
+    public void setSize(SizeType size) {this.size = size.getSize();}
     public double getPeso() {return peso;}
     public void setPeso(double peso) {this.peso = peso;}
-    public int getColor() {return color;}
-    public void setColor(int color) {this.color = color;}
+    public ColorType getColor() {return ColorType.valueOf(this.color);}
+    public void setColor(ColorType color) {this.color = color.getColor();}
 
     private static final long serialVersionUID = 1L;
 }
