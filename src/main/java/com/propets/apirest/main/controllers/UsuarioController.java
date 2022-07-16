@@ -1,5 +1,6 @@
 package com.propets.apirest.main.controllers;
 
+import com.propets.apirest.main.models.entity.Veterinario;
 import com.propets.apirest.main.models.objects.Authentication;
 import com.propets.apirest.main.models.entity.Usuario;
 import com.propets.apirest.main.models.objects.UsuarioAuth;

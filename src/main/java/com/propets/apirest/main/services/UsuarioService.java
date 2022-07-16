@@ -2,7 +2,6 @@ package com.propets.apirest.main.services;
 
 import com.propets.apirest.main.models.dao.IUsuarioDao;
 import com.propets.apirest.main.models.entity.Usuario;
-import com.propets.apirest.main.models.objects.UsuarioAuth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,7 @@ import java.util.List;
 public class UsuarioService {
     @Autowired
     private IUsuarioDao usuarioDao;
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Usuario> findAll(){
         return (List<Usuario>) usuarioDao.findAll();
     }

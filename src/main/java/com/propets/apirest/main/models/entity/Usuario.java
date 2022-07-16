@@ -29,6 +29,8 @@ public class Usuario implements Serializable {
     private int rol;
     @OneToOne(mappedBy = "usuario",cascade = CascadeType.ALL)
     private Persona persona;
+    @OneToOne(mappedBy = "usuario",cascade = CascadeType.ALL)
+    private Veterinario veterinario;
     @OneToMany(mappedBy = "usuario")
     private List<Mascota> mascotas = new ArrayList<>();
     public Usuario(){}
@@ -46,6 +48,8 @@ public class Usuario implements Serializable {
     }
     public void setPersona(Persona persona) {this.persona = persona;}
     public Persona getPersona() {return persona;}
+    public Veterinario getVeterinario() {return veterinario;}
+    public void setVeterinario(Veterinario veterinario) {this.veterinario = veterinario;}
     public String getEmail() {return email;}
     public void setEmail(String email) {this.email = email;}
     public void setPassword(String password) {this.password = password;}
