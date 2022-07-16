@@ -44,6 +44,11 @@ public class VeterinarioController {
         for(Veterinario veterinario:veterinarios) usuarios.add(veterinario.getUsuario());
         return new ResponseEntity<>(usuarios,HttpStatus.OK);
     }
+    @GetMapping(value = "/veterinario/{id}")
+    public @ResponseBody ResponseEntity<?> showById(@PathVariable String id){
+        Veterinario veterinario = veterinarioService.findById(id);
+        return new ResponseEntity<>(veterinario.getUsuario(),HttpStatus.OK);
+    }
     @PostMapping(value = "/veterinario")
     public @ResponseBody ResponseEntity<?> create(@Valid @ModelAttribute VeterinarioAuth data, BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);

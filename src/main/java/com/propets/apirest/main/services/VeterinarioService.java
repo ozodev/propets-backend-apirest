@@ -16,7 +16,8 @@ public class VeterinarioService {
 
     @Transactional
     public List<Veterinario> findAll(){return veterinarioDao.findAll();}
-
+    @Transactional
+    public Veterinario findById(String id){return veterinarioDao.findById(id).orElse(null);}
     @Transactional
     public Veterinario save(Veterinario veterinario){return veterinarioDao.save(veterinario);}
     @Transactional

@@ -41,6 +41,9 @@ public class Mascota implements Serializable {
     @JoinColumn(name="usuario_email",foreignKey = @ForeignKey(name = "fk_mascota_usuario_email"))
     private Usuario usuario;
 
+    @OneToOne(mappedBy = "mascota")
+    private Cita cita;
+
     public Mascota(){}
 
     public Mascota(MascotaData data,Usuario usuario){
@@ -56,6 +59,8 @@ public class Mascota implements Serializable {
         this.size = SizeType.valueOf(data.getSize().toUpperCase()).getSize();
     }
 
+    public Cita getCita() {return cita;}
+    public void setCita(Cita cita) {this.cita = cita;}
     public Usuario getUsuario(){return this.usuario;}
     public void setUsuario(Usuario usuario){this.usuario=usuario;}
     public String getId() {return id;}

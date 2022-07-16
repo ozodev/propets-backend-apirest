@@ -46,7 +46,8 @@ public class Veterinario implements Serializable {
         this.cedula = data.getCedula();
         this.especialidad = VeterinarioType.valueOf(data.getEspecialidad()).getType();
     }
-
+    public String getId() {return id;}
+    public void setId(String id) {this.id = id;}
     public Usuario getUsuario() {return usuario;}
     public void setUsuario(Usuario usuario) {this.usuario = usuario;}
     public CentroAtencion getCentroAtencion() {return centroAtencion;}
@@ -55,7 +56,6 @@ public class Veterinario implements Serializable {
     public void setEspecialidad(VeterinarioType especialidad) {this.especialidad = especialidad.getType();}
     public String getCedula() {return cedula;}
     public void setCedula(String cedula) {this.cedula = cedula;}
-
     public String getDireccion(){return getCentroAtencion().getDireccion();}
     public String getCiudad(){return  getCentroAtencion().getCiudad();}
 
