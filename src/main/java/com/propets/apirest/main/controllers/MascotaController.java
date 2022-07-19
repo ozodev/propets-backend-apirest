@@ -5,14 +5,13 @@ import com.propets.apirest.main.models.Enums.RazaType;
 import com.propets.apirest.main.models.Enums.SizeType;
 import com.propets.apirest.main.models.entity.Mascota;
 import com.propets.apirest.main.models.entity.Usuario;
-import com.propets.apirest.main.models.objects.MascotaData;
-import com.propets.apirest.main.models.objects.MascotaDelete;
 import com.propets.apirest.main.services.MascotaService;
 import com.propets.apirest.main.services.MessageService;
 import com.propets.apirest.main.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,9 +20,9 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.propets.apirest.main.services.MessageService.errorMessage;
-import static com.propets.apirest.main.services.MessageService.sendMessageError;
 
 @RestController
 @RequestMapping("/api")
@@ -32,55 +31,50 @@ public class MascotaController {
     private UsuarioService usuarioService;
     @Autowired
     private MascotaService mascotaService;
-
+    @Secured({"ROLE_VETERINARIO","ROLE_ADMIN"})
     @GetMapping(value = "/mascota/{id}")
     public @ResponseBody ResponseEntity<?> show(@PathVariable String id){
         Mascota mascota = mascotaService.findById(id);
-        if(Objects.isNull(mascota)) return sendMessageError("La Mascota "+id+" no Existe",HttpStatus.UNAUTHORIZED);
+        if(Objects.isNull(mascota)) return MessageService.sendExistMessage("La Mascota No Existe","mascota",id,"/api/mascota/"+id,HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(mascota,HttpStatus.OK);
     }
+
     @GetMapping(value = "/mascota/raza")
     public @ResponseBody ResponseEntity<?> showRazas(){return new ResponseEntity<>(RazaType.values(),HttpStatus.OK);}
     @GetMapping(value = "/mascota/color")
     public @ResponseBody ResponseEntity<?> showColores(){return new ResponseEntity<>(ColorType.values(),HttpStatus.OK);}
     @GetMapping(value = "/mascota/size")
     public @ResponseBody ResponseEntity<?> showSize(){return new ResponseEntity<>(SizeType.values(),HttpStatus.OK);}
-    @PostMapping(value = "/mascota",consumes = {"multipart/form-data"})
-    public @ResponseBody ResponseEntity<?> createMascota(@Valid @ModelAttribute MascotaData data, BindingResult validationResult){
+    @Secured("ROLE_USER")
+    @PostMapping(value = "/mascota")
+    public @ResponseBody ResponseEntity<?> create(@RequestHeader("authorization") String authorization,@Valid @ModelAttribute Mascota data, BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(Objects.isNull(usuarioService.findByEmail(data.getEmail()))) return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
-        Usuario user = usuarioService.findByEmail(data.getEmail());
-        if(!user.isAuth(data.getPassword())) return MessageService.loginError();
-        Mascota mascota = new Mascota(data,user);
-        mascotaService.save(mascota);
-        return new ResponseEntity<>(mascota,HttpStatus.CREATED);
+        Usuario user = usuarioService.findByToken(authorization);
+        data.setUsuario(user);
+        data.setId(UUID.randomUUID().toString());
+        user.addMascotas(data);
+        mascotaService.save(data);
+        return new ResponseEntity<>(usuarioService.save(user),HttpStatus.CREATED);
     }
-
-    @PutMapping(value ="/mascota/{id}", consumes = {"multipart/form-data"})
-    public @ResponseBody ResponseEntity<?> updateMascota(@PathVariable String id,@Valid @ModelAttribute MascotaData data,BindingResult validationResult){
+    @Secured("ROLE_USER")
+    @PutMapping(value ="/mascota/{id}")
+    public @ResponseBody ResponseEntity<?> update(@RequestHeader("authorization") String authorization,@PathVariable String id,@Valid @ModelAttribute Mascota data,BindingResult validationResult){
         if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
-        Usuario user = usuarioService.findByEmail(data.getEmail());
-        if(!user.isAuth(data.getPassword())) return MessageService.loginError();
-        if(Objects.isNull(mascotaService.findById(id))) return sendMessageError("La Mascota de "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
+        Usuario user = usuarioService.findByToken(authorization);
         Mascota mascota = mascotaService.findById(id);
+        if(Objects.isNull(mascota)) return MessageService.sendErrorMessage("Mascota no existe","Mascota not Found","/api/mascota/"+id,HttpStatus.BAD_REQUEST);
+        if(!mascota.getUsuario().getEmail().equals(user.getEmail())) return MessageService.sendErrorMessage("No es propietario","Not Authorized","/api/mascota/"+id,HttpStatus.UNAUTHORIZED);
         mascota.update(data);
         return new ResponseEntity<>(mascotaService.save(mascota), HttpStatus.ACCEPTED);
     }
-
-    @DeleteMapping(value = "/mascota",consumes = {"multipart/form-data"})
-    public @ResponseBody ResponseEntity<?> deleteMascota(@Valid @ModelAttribute MascotaDelete data,BindingResult validationResult){
-        if(validationResult.hasErrors()) return errorMessage(validationResult);
-        if(Objects.isNull(usuarioService.findByEmail(data.getEmail())))return sendMessageError("El Usuario "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
-        Usuario user = usuarioService.findByEmail(data.getEmail());
-        if(!user.isAuth(data.getPassword())) return MessageService.loginError();
-        if(Objects.isNull(mascotaService.findById(data.getId()))) return sendMessageError("La Mascota de "+data.getEmail()+" no Existe",HttpStatus.UNAUTHORIZED);
-        Mascota mascota = mascotaService.findById(data.getId());
+    @Secured("ROLE_USER")
+    @DeleteMapping(value = "/mascota/{id}")
+    public @ResponseBody ResponseEntity<?> delete(@RequestHeader("authorization") String authorization,@PathVariable String id){
+        Usuario user = usuarioService.findByToken(authorization);
+        Mascota mascota = mascotaService.findById(id);
+        if(Objects.isNull(mascota)) return MessageService.sendErrorMessage("Mascota no existe","Mascota not Found","/api/mascota/"+id,HttpStatus.BAD_REQUEST);
+        if(!mascota.getUsuario().getEmail().equals(user.getEmail())) return MessageService.sendErrorMessage("No es propietario","Not Authorized","/api/mascota/"+id,HttpStatus.UNAUTHORIZED);
         mascotaService.delete(mascota);
-        Map<String, String> result = new HashMap<>();
-        result.put("message","Mascota fue Eliminado");
-        result.put("usuario_email",user.getEmail());
-        result.put("mascota_uuid", data.getId());
-        return new ResponseEntity<>(result,HttpStatus.ACCEPTED);
+        return MessageService.sendDeleteMessage("Mascota Eliminada con Exito","Mascota",id,"/api/mascota/"+id,HttpStatus.OK);
     }
 }

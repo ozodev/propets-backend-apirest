@@ -1,9 +1,8 @@
 package com.propets.apirest.main.models.entity;
 
-import com.propets.apirest.main.models.objects.UsuarioData;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -20,6 +19,7 @@ public class Persona implements Serializable {
 	private String id;
 
 	@OneToOne(cascade = CascadeType.ALL)
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	@JoinColumn(name="usuario_email",referencedColumnName = "usuario_email",foreignKey = @ForeignKey(name = "fk_persona_usuario_email"),unique = true)
 	private Usuario usuario;
 	@Column(name="persona_nombre",length=30)
@@ -39,25 +39,21 @@ public class Persona implements Serializable {
 	@Size(max = 10)
 	private String telefono;
 
-	public Persona(){}
-	public Persona(UsuarioData data, Usuario user){
-		this.nombre= data.getNombre();
-		this.apellido= data.getApellido();
-		this.telefono=data.getTelefono();
-		this.usuario=user;
-		this.id = UUID.randomUUID().toString();
-	}
 	public String getNombre() {return nombre;}
 	public void setNombre(String nombre) {this.nombre = nombre;}
 	public String getApellido() {return apellido;}
 	public void setApellido(String apellido) {this.apellido = apellido;}
 	public String getTelefono() {return telefono;}
 	public void setTelefono(String numero) {this.telefono = numero;}
-	public void update(UsuarioData data){
+	public String getId() {return id;}
+	public void setId(String id) {this.id = id;}
+	public void update(Persona data){
 		this.nombre= data.getNombre();
 		this.apellido= data.getApellido();
 		this.telefono= data.getTelefono();
 	}
-	
+	public Usuario getUsuario() {return usuario;}
+	public void setUsuario(Usuario usuario) {this.usuario = usuario;}
+
 	private static final long serialVersionUID = 1L;
 }

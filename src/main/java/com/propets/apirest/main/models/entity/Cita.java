@@ -3,39 +3,37 @@ package com.propets.apirest.main.models.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.propets.apirest.main.models.Enums.FranjaType;
 import com.propets.apirest.main.models.Enums.StatusType;
-import com.propets.apirest.main.models.objects.CitaData;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Table(name = "citas")
 public class Cita implements Serializable {
     @Id
-    @NotEmpty
     @Column(name = "cita_uuid",length = 36)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "centro_uuid",foreignKey = @ForeignKey(name = "fk_cita_centro_uuid"))
-    private CentroAtencion centroAtencion;
-
+    @NonNull
+    private CentroAtencion centro;
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "veterinario_uuid",foreignKey = @ForeignKey(name = "fk_cita_veterinario_uuid"))
+    @NonNull
     private Veterinario veterinario;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @JoinColumn(name="usuario_email",referencedColumnName = "usuario_email",foreignKey = @ForeignKey(name = "fk_cita_usuario_email"),unique = true)
+    @JoinColumn(name="usuario_email",referencedColumnName = "usuario_email",foreignKey = @ForeignKey(name = "fk_cita_usuario_email"))
     private Usuario usuario;
-
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @NonNull
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "mascota_uuid",foreignKey = @ForeignKey(name = "fk_cita_mascota_uuid"))
     private Mascota mascota;
@@ -55,22 +53,15 @@ public class Cita implements Serializable {
     @NonNull @NotEmpty
     @Column(name = "cita_status",length = 1)
     private String status;
-
-    public Cita(){}
-    public Cita(CitaData data){
-        this.id = UUID.randomUUID().toString();
-        update(data);
-    }
-    public void update(CitaData data){
+    public void update(Cita data){
         setStatus(data.getStatus());
         setFranja(data.getFranja());
         setDia(data.getDia());
         setMes(data.getMes());
         setYear(data.getYear());
     }
-
-    public CentroAtencion getCentroAtencion() {return centroAtencion;}
-    public void setCentroAtencion(CentroAtencion centroAtencion) {this.centroAtencion = centroAtencion;}
+    public CentroAtencion getCentro() {return centro;}
+    public void setCentro(CentroAtencion centro) {this.centro = centro;}
 
     public Usuario getVeterinario() {return veterinario.getUsuario();}
     public void setVeterinario(Veterinario veterinario) {this.veterinario = veterinario;}
@@ -99,8 +90,9 @@ public class Cita implements Serializable {
     public StatusType getStatus() {return StatusType.value(this.status);}
     public void setStatus(StatusType status) {this.status = status.getStatus();}
 
-    public String getPaciente(){return this.mascota.getId();}
-    public String getCentro(){return this.centroAtencion.getId();}
-    public String getDoctor(){return this.veterinario.getId();}
+    public String getPaciente(){return getMascota().getId();}
+    public String getLugar(){return getCentro().getId();}
+    public String getDoctor(){return getVeterinario().getEmail();}
+
     private static final long serialVersionUID = 1L;
 }

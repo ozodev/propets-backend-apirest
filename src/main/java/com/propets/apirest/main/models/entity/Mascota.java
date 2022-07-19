@@ -4,14 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.propets.apirest.main.models.Enums.ColorType;
 import com.propets.apirest.main.models.Enums.RazaType;
 import com.propets.apirest.main.models.Enums.SizeType;
-import com.propets.apirest.main.models.objects.MascotaData;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.io.Serializable;
-import java.util.UUID;
+import java.util.List;
 
 @Entity
 @Table(name = "mascotas")
@@ -40,27 +39,18 @@ public class Mascota implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name="usuario_email",foreignKey = @ForeignKey(name = "fk_mascota_usuario_email"))
     private Usuario usuario;
-
-    @OneToOne(mappedBy = "mascota")
-    private Cita cita;
-
-    public Mascota(){}
-
-    public Mascota(MascotaData data,Usuario usuario){
-        this.id= UUID.randomUUID().toString();
-        this.usuario=usuario;
-        this.update(data);
+    @OneToMany(mappedBy = "mascota")
+    private List<Cita> cita;
+    public void update(Mascota data){
+        setNombre(data.getNombre());
+        setRaza(data.getRaza());
+        setPeso(data.getPeso());
+        setColor(data.getColor());
+        setSize(data.getSize());
     }
-    public void update(MascotaData data){
-        this.nombre= data.getNombre();
-        this.raza= RazaType.valueOf(data.getRaza().toUpperCase()).getRaza();
-        this.peso = data.getPeso();
-        this.color = ColorType.valueOf(data.getColor().toUpperCase()).getColor();
-        this.size = SizeType.valueOf(data.getSize().toUpperCase()).getSize();
-    }
+    public List<Cita> getCita() {return cita;}
+    public void setCita(List<Cita> cita) {this.cita = cita;}
 
-    public Cita getCita() {return cita;}
-    public void setCita(Cita cita) {this.cita = cita;}
     public Usuario getUsuario(){return this.usuario;}
     public void setUsuario(Usuario usuario){this.usuario=usuario;}
     public String getId() {return id;}
