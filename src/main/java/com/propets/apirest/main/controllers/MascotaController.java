@@ -31,9 +31,15 @@ public class MascotaController {
     private UsuarioService usuarioService;
     @Autowired
     private MascotaService mascotaService;
+    @Secured("ROLE_USER")
+    @GetMapping(value = "/mascota")
+    public @ResponseBody ResponseEntity<?> show(@RequestHeader("authorization") String authorization){
+        Usuario user = usuarioService.findByToken(authorization);
+        return new ResponseEntity<>(user.getMascotas(),HttpStatus.ACCEPTED);
+    }
     @Secured({"ROLE_VETERINARIO","ROLE_ADMIN"})
     @GetMapping(value = "/mascota/{id}")
-    public @ResponseBody ResponseEntity<?> show(@PathVariable String id){
+    public @ResponseBody ResponseEntity<?> showById(@PathVariable String id){
         Mascota mascota = mascotaService.findById(id);
         if(Objects.isNull(mascota)) return MessageService.sendExistMessage("La Mascota No Existe","mascota",id,"/api/mascota/"+id,HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(mascota,HttpStatus.OK);
