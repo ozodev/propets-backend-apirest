@@ -1,6 +1,7 @@
 package com.propets.apirest.main.models.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.propets.apirest.main.models.Enums.CitaType;
 import com.propets.apirest.main.models.Enums.FranjaType;
 import com.propets.apirest.main.models.Enums.StatusType;
 import org.springframework.lang.NonNull;
@@ -18,13 +19,13 @@ public class Cita implements Serializable {
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "centro_uuid",foreignKey = @ForeignKey(name = "fk_cita_centro_uuid"))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NonNull
     private CentroAtencion centro;
     @ManyToOne(fetch = FetchType.LAZY,optional = false)
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name = "veterinario_uuid",foreignKey = @ForeignKey(name = "fk_cita_veterinario_uuid"))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NonNull
     private Veterinario veterinario;
 
@@ -53,17 +54,23 @@ public class Cita implements Serializable {
     @NonNull @NotEmpty
     @Column(name = "cita_status",length = 1)
     private String status;
+
+    @NonNull
+    @Column(name = "cita_type")
+    private int type;
     public void update(Cita data){
-        setStatus(data.getStatus());
-        setFranja(data.getFranja());
-        setDia(data.getDia());
+        setCentro(data.getCentro());
+        setVeterinario(data.getVeterinario());
         setMes(data.getMes());
+        setDia(data.getDia());
         setYear(data.getYear());
+        setFranja(data.getFranja());
+        setStatus(data.getStatus());
     }
     public CentroAtencion getCentro() {return centro;}
     public void setCentro(CentroAtencion centro) {this.centro = centro;}
 
-    public Usuario getVeterinario() {return veterinario.getUsuario();}
+    public Veterinario getVeterinario() {return veterinario;}
     public void setVeterinario(Veterinario veterinario) {this.veterinario = veterinario;}
 
     public Mascota getMascota() {return mascota;}
@@ -89,10 +96,12 @@ public class Cita implements Serializable {
 
     public StatusType getStatus() {return StatusType.value(this.status);}
     public void setStatus(StatusType status) {this.status = status.getStatus();}
-
-    public String getPaciente(){return getMascota().getId();}
+    public CitaType getType() {return CitaType.value(this.type);}
+    public void setType(CitaType type) {this.type = type.getType();}
+    public String getParner(){return this.usuario.getEmail();}
+    public String getPaciente(){return this.getMascota().getId();}
     public String getLugar(){return getCentro().getId();}
-    public String getDoctor(){return getVeterinario().getEmail();}
+    public String getDoctor(){return this.getVeterinario().getId();}
 
     private static final long serialVersionUID = 1L;
 }

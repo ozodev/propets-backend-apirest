@@ -15,4 +15,7 @@ public interface ICitaDao extends JpaRepository<Cita,String>, JpaSpecificationEx
 
     @Query(value = "select * from citas as c where c.mascota_uuid = ?1 and c.cita_dia= ?2 and c.cita_mes = ?3 and c.cita_year = ?4 and c.cita_franja = ?5 and c.cita_status = ?6",nativeQuery = true)
     Optional<Cita> findByDataAndStatus(String mascota, int dia, int mes, int year, int franja, String status);
+
+    @Query(value = "select * from citas as c where c.usuario_email = ?1 ",nativeQuery = true)
+    List<Cita> findAllByUsuario(String usuario);
 }

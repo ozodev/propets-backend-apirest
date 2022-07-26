@@ -25,6 +25,7 @@ public class Veterinario implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "centro_uuid",foreignKey = @ForeignKey(name = "fk_veterinario_centro_uuid"))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotNull
     private CentroAtencion centro;
 

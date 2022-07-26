@@ -3,6 +3,7 @@ package com.propets.apirest.main.services;
 import com.propets.apirest.main.models.Enums.StatusType;
 import com.propets.apirest.main.models.dao.ICitaDao;
 import com.propets.apirest.main.models.entity.Cita;
+import com.propets.apirest.main.models.entity.Usuario;
 import com.propets.apirest.main.models.entity.Veterinario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,4 +31,6 @@ public class CitaService {
     public void deleteById(String id){citaDao.deleteById(id);}
     @Transactional(readOnly = true)
     public Cita findByDataAndStatus(Cita data, StatusType status){return citaDao.findByDataAndStatus(data.getMascota().getId(),data.getDia(), data.getMes(), data.getYear(),data.getFranja().getFranja(),status.getStatus()).orElse(null);}
+    @Transactional(readOnly = true)
+    public List<Cita> findAllByUsuario(Usuario usuario){return citaDao.findAllByUsuario(usuario.getEmail());}
 }

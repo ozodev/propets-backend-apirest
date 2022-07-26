@@ -10,7 +10,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.io.Serializable;
-import java.util.List;
 
 @Entity
 @Table(name = "mascotas")
@@ -39,8 +38,6 @@ public class Mascota implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JoinColumn(name="usuario_email",foreignKey = @ForeignKey(name = "fk_mascota_usuario_email"))
     private Usuario usuario;
-    @OneToMany(mappedBy = "mascota")
-    private List<Cita> cita;
     public void update(Mascota data){
         setNombre(data.getNombre());
         setRaza(data.getRaza());
@@ -48,9 +45,6 @@ public class Mascota implements Serializable {
         setColor(data.getColor());
         setSize(data.getSize());
     }
-    public List<Cita> getCita() {return cita;}
-    public void setCita(List<Cita> cita) {this.cita = cita;}
-
     public Usuario getUsuario(){return this.usuario;}
     public void setUsuario(Usuario usuario){this.usuario=usuario;}
     public String getId() {return id;}

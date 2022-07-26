@@ -17,10 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static com.propets.apirest.main.services.MessageService.errorMessage;
 
@@ -46,7 +43,16 @@ public class MascotaController {
     }
 
     @GetMapping(value = "/mascota/raza")
-    public @ResponseBody ResponseEntity<?> showRazas(){return new ResponseEntity<>(RazaType.values(),HttpStatus.OK);}
+    public @ResponseBody ResponseEntity<?> showRazas(){
+        List<Map<String, String>> razas = new ArrayList<>();
+        for(RazaType razaType:RazaType.values()) {
+            Map<String, String> raza = new HashMap<>();
+            raza.put("title",razaType.getTitulo());
+            raza.put("value",razaType.toString());
+            razas.add(raza);
+        }
+        return new ResponseEntity<>(razas,HttpStatus.OK);
+    }
     @GetMapping(value = "/mascota/color")
     public @ResponseBody ResponseEntity<?> showColores(){return new ResponseEntity<>(ColorType.values(),HttpStatus.OK);}
     @GetMapping(value = "/mascota/size")

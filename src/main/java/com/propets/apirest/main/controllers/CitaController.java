@@ -1,5 +1,7 @@
 package com.propets.apirest.main.controllers;
 
+import com.propets.apirest.main.models.Enums.CitaType;
+import com.propets.apirest.main.models.Enums.FranjaType;
 import com.propets.apirest.main.models.Enums.StatusType;
 import com.propets.apirest.main.models.entity.*;
 import com.propets.apirest.main.services.*;
@@ -31,10 +33,34 @@ public class CitaController {
     private CitaService citaService;
     @Autowired RoleService roleService;
 
-    @Secured("ROLE_ADMIN")
+    @Secured("ROLE_USER")
     @GetMapping(value = "/cita")
-    public @ResponseBody ResponseEntity<?> show(){
-        return new ResponseEntity<>(citaService.findAll(), HttpStatus.OK);
+    public @ResponseBody ResponseEntity<?> show(@RequestHeader("authorization") String authorization){
+        Usuario user = usuarioService.findByToken(authorization);
+        if(user.getRoles().contains(roleService.findRole(1L))) return new ResponseEntity<>(citaService.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(citaService.findAllByUsuario(user), HttpStatus.OK);
+    }
+    @GetMapping(value = "/cita/tipo")
+    public @ResponseBody ResponseEntity<?> showType(){
+        List<Map<String, String>> citas = new ArrayList<>();
+        for(CitaType citaType:CitaType.values()){
+            Map<String, String> cita = new HashMap<>();
+            cita.put("title", citaType.getTitulo());
+            cita.put("value",citaType.toString());
+            citas.add(cita);
+        }
+        return new ResponseEntity<>(citas,HttpStatus.OK);
+    }
+    @GetMapping(value = "/cita/franja")
+    public @ResponseBody ResponseEntity<?> showFranja(){
+        List<Map<String, String>> franjas = new ArrayList<>();
+        for(FranjaType franjaType:FranjaType.values()){
+            Map<String, String> franja = new HashMap<>();
+            franja.put("title", franjaType.getTitulo());
+            franja.put("value",franjaType.toString());
+            franjas.add(franja);
+        }
+        return new ResponseEntity<>(franjas,HttpStatus.OK);
     }
     @Secured("ROLE_VETERINARIO")
     @GetMapping(value = "/cita/veterinario")
@@ -72,17 +98,18 @@ public class CitaController {
         if(validationResult.hasErrors()) return errorMessage(validationResult);
         Usuario user = usuarioService.findByToken(authorization);
         Cita cita = citaService.findById(id);
-        if(!cita.getUsuario().getEmail().equals(user.getEmail()) || !user.getRoles().contains(roleService.findRole(1L))) return MessageService.sendErrorMessage("Sin autorizacion","Not Authorized","/api/cita/"+id,HttpStatus.BAD_REQUEST);
-        cita.update(data);
-        return new ResponseEntity<>(citaService.save(cita),HttpStatus.ACCEPTED);
+        if(!cita.getUsuario().getEmail().equals(user.getEmail()) && !user.getRoles().contains(roleService.findRole(1L))) return MessageService.sendErrorMessage("Sin autorizacion","Not Authorized","/api/cita/"+id,HttpStatus.BAD_REQUEST);
+        citaService.delete(cita);
+        data.setUsuario(user);
+        data.setId(UUID.randomUUID().toString());
+        return new ResponseEntity<>(citaService.save(data),HttpStatus.ACCEPTED);
     }
     @Secured({"ROLE_USER","ROLE_ADMIN"})
     @DeleteMapping(value = "/cita/{id}")
-    public @ResponseBody ResponseEntity<?> delete(@PathVariable String id,@RequestHeader("authorization") String authorization, BindingResult validationResult){
-        if(validationResult.hasErrors()) return errorMessage(validationResult);
+    public @ResponseBody ResponseEntity<?> delete(@PathVariable String id,@RequestHeader("authorization") String authorization){
         Usuario user = usuarioService.findByToken(authorization);
         Cita cita = citaService.findById(id);
-        if(!cita.getUsuario().getEmail().equals(user.getEmail()) || !user.getRoles().contains(roleService.findRole(1L))) return MessageService.sendErrorMessage("No Eres dueño de esta cita","Cita not Found","/api/cita/"+id,HttpStatus.BAD_REQUEST);
+        if(!cita.getUsuario().getEmail().equals(user.getEmail()) && !user.getRoles().contains(roleService.findRole(1L))) return MessageService.sendErrorMessage("No Eres dueño de esta cita","Cita not Found","/api/cita/"+id,HttpStatus.BAD_REQUEST);
         citaService.delete(cita);
         return MessageService.sendDeleteMessage("Cita Eliminada","cita",id,"/api/cita/"+id,HttpStatus.ACCEPTED);
     }
