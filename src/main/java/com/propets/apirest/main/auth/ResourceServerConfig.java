@@ -16,11 +16,13 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers(HttpMethod.GET,
                         "/api/centro_atencion",
                         "/api/veterinario",
-                        "/api/mascota/**",
+                        "/api/pet/**",
+                        "/api/race",
+                        "/api/race/**",
                         "/api/cita/tipo",
                         "/api/cita/franja")
                 .permitAll()
-                .antMatchers(HttpMethod.POST,"/api/usuario").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/user").permitAll()
                 .anyRequest().authenticated();
     }
 }
