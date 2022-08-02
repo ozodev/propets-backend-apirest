@@ -9,7 +9,8 @@ public enum ResponseType {
     INVALID_FIELDS("Campos Invalidos"),
     ENTITY_UPDATE("Entidad Actualizada"),
     ENTITY_DELETE("Entidad Eliminada"),
-    ENTITY_DISABLE("Entidad Deshabilitada");
+    ENTITY_DISABLE("Entidad Deshabilitada"),
+    UNAUTHORIZED("No tienes permiso");
 
     @Getter
     private String message;

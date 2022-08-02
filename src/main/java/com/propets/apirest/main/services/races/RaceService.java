@@ -13,4 +13,6 @@ public interface RaceService {
     Race save(Race race);
 
     void disable(Race race);
+
+    Race findByName(String name);
 }

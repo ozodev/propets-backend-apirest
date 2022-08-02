@@ -38,5 +38,10 @@ public class RaceServiceImplement implements RaceService {
         race.setEnabled(false);
         save(race);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Race findByName(String name){
+        return raceDao.findByName(name).orElse(null);
+    }
 
 }

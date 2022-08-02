@@ -12,4 +12,6 @@ public interface ColorService {
     Color save(Color color);
 
     void disable(Color color);
+
+    Color findByName(String name);
 }

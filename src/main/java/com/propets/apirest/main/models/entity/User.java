@@ -11,35 +11,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "users")
 public class User {
     @Id
     @Column(length = 60, nullable = false)
-    @Getter
-    @Setter
     private String email;
+
     @Column(length = 60, nullable = false)
-    @Getter
-    @Setter
     private String password;
-    @Getter
-    @Setter
+
     private Boolean enabled;
+
     @Column(length = 35, nullable = false)
-    @Getter
-    @Setter
     private String name;
+
     @Column(length = 35, nullable = false)
-    @Getter
-    @Setter
     private String lastname;
+
     @Column(length = 10, nullable = false)
-    @Getter
-    @Setter
     private String phone;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @Getter
-    @Setter
     private List<Role> roles = new ArrayList<>();
 
     public User() {

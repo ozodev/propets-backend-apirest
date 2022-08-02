@@ -12,26 +12,20 @@ import com.propets.apirest.main.models.entity.atributos.Race;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class RaceDto extends ResponseDto {
 
-    @Getter
-    @Setter
     private Long id;
 
-    @Getter
-    @Setter
     @NotBlank
     @NotNull
     @NotEmpty
     private String name;
 
-    @Getter
-    @Setter
     @NotNull
     private String title;
 
-    @Getter
-    @Setter
     private boolean enabled;
 
     public RaceDto() {

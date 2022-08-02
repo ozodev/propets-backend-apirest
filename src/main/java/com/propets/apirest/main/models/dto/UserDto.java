@@ -13,38 +13,27 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+@Getter
+@Setter
 public class UserDto extends ResponseDto {
     @Email
     @NotNull
-    @Getter
-    @Setter
     private String email;
     @NotNull
     @NotEmpty
-    @Getter
-    @Setter
     private String name;
     @NotNull
     @NotEmpty
-    @Getter
-    @Setter
     private String lastname;
     @NotNull
     @NotEmpty
     @NotBlank
-    @Getter
-    @Setter
     private String phone;
     @NotNull
     @NotEmpty
     @NotBlank
-    @Setter
     private String password;
-    @Getter
-    @Setter
     private Boolean enabled;
-    @Getter
-    @Setter
     private List<Role> roles;
 
     public UserDto() {

@@ -12,33 +12,23 @@ import com.propets.apirest.main.models.entity.atributos.Color;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 public class ColorDto extends ResponseDto {
-
-    @Getter
-    @Setter
     private Long id;
-
-    @Getter
-    @Setter
     @NotBlank
     @NotNull
     @NotEmpty
     private String name;
-
-    @Getter
-    @Setter
     @NotNull
     private String title;
-
-    @Getter
-    @Setter
     private boolean enabled;
 
     public ColorDto() {
     }
 
     public ColorDto(Color race) {
-        if(Objects.nonNull(race.getId()))
+        if (Objects.nonNull(race.getId()))
             setId(race.getId());
         setName(race.getName());
         setTitle(race.getTitle());

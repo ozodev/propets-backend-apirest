@@ -9,15 +9,12 @@ import com.propets.apirest.main.models.enums.ResponseType;
 
 import lombok.Getter;
 
+@Getter
 public class InvalidDto extends ResponseDto {
 
-    @Getter
     private List<String> errors;
-    @Getter
     private String message;
-    @Getter
     private String timestamp;
-    @Getter
     private String path;
 
     public InvalidDto(ResponseType message, List<String> errors, String path) {

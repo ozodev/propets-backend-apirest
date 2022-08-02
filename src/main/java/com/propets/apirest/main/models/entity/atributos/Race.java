@@ -13,28 +13,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "races")
 public class Race {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private Long id;
 
     @Column(length = 30, nullable = false)
-    @Getter
-    @Setter
     private String name;
 
     @Column(length = 30, nullable = false)
-    @Getter
-    @Setter
     private String title;
 
     @Column()
-    @Getter
-    @Setter
     private boolean enabled;
 
     public Race(){}

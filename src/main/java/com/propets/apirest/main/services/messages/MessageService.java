@@ -18,4 +18,6 @@ public interface MessageService {
     ResponseEntity<ResponseDto> invalidFields(BindingResult validationResult, String path);
 
     List<String> validErros(BindingResult validationResult);
+    
+    ResponseEntity<ResponseDto> unauthorized(String path);
 }
