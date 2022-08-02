@@ -7,19 +7,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.propets.apirest.main.models.dto.response.ColorDto;
+import com.propets.apirest.main.models.dto.response.SizeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "colors")
-public class Color {
+@Table(name = "sizes")
+public class Size {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
 
     @Column(length = 30, nullable = false)
@@ -31,13 +31,14 @@ public class Color {
     @Column()
     private boolean enabled;
 
-    public Color() {
+    public Size() {
     }
 
-    public Color(ColorDto colorDto) {
-        setId(colorDto.getId());
-        setName(colorDto.getName());
-        setTitle(colorDto.getTitle());
-        setEnabled(colorDto.isEnabled());
+    public Size(SizeDto sizeDto) {
+        setId(sizeDto.getId());
+        setName(sizeDto.getName());
+        setTitle(sizeDto.getTitle());
+        setEnabled(sizeDto.isEnabled());
     }
+
 }

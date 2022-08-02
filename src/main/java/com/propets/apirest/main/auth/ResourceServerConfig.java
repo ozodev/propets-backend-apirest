@@ -19,6 +19,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                         "/api/pet/**",
                         "/api/race",
                         "/api/race/**",
+                        "/api/color",
+                        "/api/color/**",
+                        "/api/size",
+                        "/api/size/**",
                         "/api/cita/tipo",
                         "/api/cita/franja")
                 .permitAll()

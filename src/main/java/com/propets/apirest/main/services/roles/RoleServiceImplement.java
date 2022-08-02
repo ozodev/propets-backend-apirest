@@ -1,6 +1,7 @@
 package com.propets.apirest.main.services.roles;
 
 import com.propets.apirest.main.models.dao.atributos.IRoleDao;
+import com.propets.apirest.main.models.entity.User;
 import com.propets.apirest.main.models.entity.atributos.Role;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,5 +16,9 @@ public class RoleServiceImplement implements RoleService {
     @Transactional(readOnly = true)
     public Role findRole(Long id) {
         return roleDao.findById(id).orElse(null);
+    }
+    @Transactional(readOnly = true)
+    public Boolean isAdmin(User user){
+        return user.getRoles().contains(findRole(1L));
     }
 }

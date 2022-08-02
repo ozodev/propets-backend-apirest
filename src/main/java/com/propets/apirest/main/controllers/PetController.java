@@ -1,12 +1,10 @@
 package com.propets.apirest.main.controllers;
 
-import com.propets.apirest.main.models.dto.*;
-import com.propets.apirest.main.models.entity.Pet;
-import com.propets.apirest.main.models.entity.User;
-import com.propets.apirest.main.services.messages.MessageServiceImplement;
-import com.propets.apirest.main.services.pets.PetServiceImplement;
-import com.propets.apirest.main.services.roles.RoleServiceImplement;
-import com.propets.apirest.main.services.users.UserServiceImplement;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,14 +15,22 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-
-import java.util.*;
-import java.util.stream.Collectors;
+import com.propets.apirest.main.models.dto.PageDto;
+import com.propets.apirest.main.models.dto.PetDto;
+import com.propets.apirest.main.models.dto.ResponseDto;
+import com.propets.apirest.main.models.dto.response.ActionDto;
+import com.propets.apirest.main.models.entity.Pet;
+import com.propets.apirest.main.models.entity.User;
+import com.propets.apirest.main.models.enums.ResponseType;
+import com.propets.apirest.main.services.messages.MessageServiceImplement;
+import com.propets.apirest.main.services.pets.PetServiceImplement;
+import com.propets.apirest.main.services.roles.RoleServiceImplement;
+import com.propets.apirest.main.services.users.UserServiceImplement;
 
 @RestController
 @RequestMapping("/api")
 public class PetController {
+
     @Autowired
     private UserServiceImplement userService;
     @Autowired
@@ -36,36 +42,26 @@ public class PetController {
 
     @Secured({ "ROLE_VETERINARY", "ROLE_ADMIN" })
     @GetMapping(value = "/pet/{id}")
-    public @ResponseBody ResponseEntity<?> getPetById(@PathVariable String id) {
+    public @ResponseBody ResponseEntity<ResponseDto> getPetById(@PathVariable String id, HttpServletRequest request) {
         Pet pet = petService.findById(id);
         if (Objects.isNull(pet))
-            return messageService.sendExistMessage("La Mascota No Existe", "pet", id, PATH + "/" + id,
-                    HttpStatus.BAD_REQUEST);
+            return messageService.entityNotFound(id, request.getRequestURI());
         PetDto response = new PetDto();
         response.update(pet);
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
     @Secured({ "ROLE_ADMIN", "ROLE_USER" })
-    @GetMapping(value = "/pets/{size}/{page}")
-    public @ResponseBody ResponseEntity<PageDto> getPagePets(@RequestHeader("authorization") String authorization,
-            @PathVariable Integer size, @PathVariable Integer page) {
+    @GetMapping(value = "/pet")
+    public @ResponseBody ResponseEntity<ResponseDto> getPagePets(@RequestHeader("authorization") String authorization,
+            @RequestHeader("pet-page-size") Integer size, @RequestHeader("pet-page") Integer page,
+            @RequestHeader(value = "pet-page-email", required = false) String email) {
         User user = userService.findByToken(authorization);
         Page<Pet> pets;
-        if (user.getRoles().contains(roleService.findRole(1L)))
-            pets = petService.findAll(PageRequest.of(page, size));
-        else
+        if (Boolean.TRUE.equals(roleService.isAdmin(user))) {
+            pets = petService.findAllByAdmin(email, size, page);
+        } else
             pets = petService.findAllByEmail(user.getEmail(), PageRequest.of(page, size));
-        PageDto response = new PageDto(pets);
-        response.setContent(pets.getContent().stream().map(PetDto::new).collect(Collectors.toList()));
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @GetMapping(value = "/pets/{email}/{size}/{page}")
-    public @ResponseBody ResponseEntity<PageDto> getPagePetsByEmail(@PathVariable String email,
-            @PathVariable Integer size, @PathVariable Integer page) {
-        Page<Pet> pets = petService.findAllByEmail(email, PageRequest.of(page, size));
         PageDto response = new PageDto(pets);
         response.setContent(pets.getContent().stream().map(PetDto::new).collect(Collectors.toList()));
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
@@ -73,52 +69,53 @@ public class PetController {
 
     @Secured({ "ROLE_USER", "ROLE_ADMIN" })
     @PostMapping(value = "/pet")
-    public @ResponseBody ResponseEntity<?> createPet(@RequestHeader("authorization") String authorization,
-            @Valid @ModelAttribute PetDto data, BindingResult validationResult) {
+    public @ResponseBody ResponseEntity<ResponseDto> createPet(@RequestHeader("authorization") String authorization,
+            @RequestHeader(value = "user-email", required = false) String email, @Valid @ModelAttribute PetDto data,
+            BindingResult validationResult, HttpServletRequest request) {
         if (validationResult.hasErrors())
-            return messageService.errorMessage(validationResult);
-        User user = userService.findByToken(authorization);
-        Pet pet = new Pet(data);
-        pet.setId(UUID.randomUUID().toString());
-        pet.setUser(user);
-        return new ResponseEntity<>(new PetDto(petService.save(pet)), HttpStatus.CREATED);
+            return messageService.invalidFields(validationResult, request.getRequestURI());
+        User userRequest = userService.findByToken(authorization);
+        User user;
+        if (Boolean.TRUE.equals(roleService.isAdmin(userRequest) && email != null && !"".equals(email))) {
+            user = userService.findByEmail(email);
+            if (Objects.isNull(user))
+                return messageService.entityNotFound(email, request.getRequestURI());
+        } else
+            user = userService.findByToken(authorization);
+        Pet pet = petService.createPetByData(user, data);
+        PetDto response = new PetDto(petService.save(pet));
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_USER")
     @PutMapping(value = "/pet/{id}")
-    public @ResponseBody ResponseEntity<?> update(@RequestHeader("authorization") String authorization,
-            @PathVariable String id, @Valid @ModelAttribute PetDto data, BindingResult validationResult) {
+    public @ResponseBody ResponseEntity<ResponseDto> update(@RequestHeader("authorization") String authorization,
+            @PathVariable String id, @Valid @ModelAttribute PetDto data, BindingResult validationResult,
+            HttpServletRequest request) {
         if (validationResult.hasErrors())
-            return messageService.errorMessage(validationResult);
+            return messageService.invalidFields(validationResult, request.getRequestURI());
         Pet pet = petService.findById(id);
         if (Objects.isNull(pet))
-            return messageService.sendErrorMessage("Mascota no existe", "Mascota not Found", PATH + "/" + id,
-                    HttpStatus.BAD_REQUEST);
+            return messageService.entityNotFound(id, request.getRequestURI());
         User user = userService.findByToken(authorization);
-        if (!pet.getUser().getEmail().equals(user.getEmail()))
-            return messageService.sendErrorMessage("No es propietario", "Not Authorized", PATH + "/" + id,
-                    HttpStatus.UNAUTHORIZED);
-        pet.update(data);
-        return new ResponseEntity<>(new PetDto(petService.save(pet)), HttpStatus.ACCEPTED);
+        if (!pet.getUser().getEmail().equals(user.getEmail()) && Boolean.FALSE.equals(roleService.isAdmin(user)))
+            return messageService.unauthorized(request.getRequestURI());
+        petService.updatePetByData(pet, data);
+        PetDto response = new PetDto(petService.save(pet));
+        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
     @Secured("ROLE_USER")
     @DeleteMapping(value = "/pet/{id}")
-    public @ResponseBody ResponseEntity<?> delete(@RequestHeader("authorization") String authorization,
-            @PathVariable String id) {
+    public @ResponseBody ResponseEntity<ResponseDto> delete(@RequestHeader("authorization") String authorization,
+            @PathVariable String id, HttpServletRequest request) {
         User user = userService.findByToken(authorization);
         Pet pet = petService.findById(id);
         if (Objects.isNull(pet))
-            return messageService.sendErrorMessage("Mascota no existe", "Mascota not Found", PATH + "/" + id,
-                    HttpStatus.BAD_REQUEST);
-        if (!(pet.getUser().getEmail().equals(user.getEmail()) || userService.isAdmin(user)))
-            return messageService.sendErrorMessage("No es propietario", "Not Authorized", PATH + "/" + id,
-                    HttpStatus.UNAUTHORIZED);
-        pet.setUser(null);
-        petService.delete(pet);
-        return messageService.sendDeleteMessage("Mascota Eliminada con Exito", "pet", id, PATH + "/" + id,
-                HttpStatus.OK);
+            return messageService.entityNotFound(id, request.getRequestURI());
+        if (!pet.getUser().getEmail().equals(user.getEmail()) && Boolean.FALSE.equals(roleService.isAdmin(user)))
+            return messageService.unauthorized(request.getRequestURI());
+        petService.disablePet(pet);
+        return new ResponseEntity<>(new ActionDto(ResponseType.ENTITY_DELETE), HttpStatus.ACCEPTED);
     }
-
-    private static final String PATH = "/api/pet";
 }
